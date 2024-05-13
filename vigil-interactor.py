@@ -129,7 +129,7 @@ if st.session_state.get("logged_in", False):
             internal_prompt += f"\n\n{user_name}: {prompt}"
 
             response = client.messages.create(
-                model="claude-3-opus-20240229",
+                model="claude-3-haiku-20240307",
                 max_tokens=2000,
                 temperature=0.9,
                 messages=[{
