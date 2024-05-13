@@ -146,7 +146,7 @@ def extract_text_from_response(response_content):
         return " ".join([item["text"] for item in response_content if item["type"] == "text"])
     return ""
 
- generated_text = response.content
+generated_text = response.content
 # Lugar donde se procesa la respuesta de la IA antes de mostrarla
 if generated_text:
     clean_text = extract_text_from_response(generated_text["content"])
