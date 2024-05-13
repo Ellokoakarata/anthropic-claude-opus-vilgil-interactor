@@ -139,18 +139,22 @@ if st.session_state.get("logged_in", False):
                 }]
             )
 
-            generated_text = response.content
-            st.session_state['messages'].append({"role": "assistant", "content": generated_text})
+def extract_text_from_response(response_content):
+    # La respuesta_content es una lista de diccionarios
+    # Cada diccionario tiene una clave "type" y "text"
+    if isinstance(response_content, list):
+        return " ".join([item["text"] for item in response_content if item["type"] == "text"])
+    return ""
 
-            # Convert data before saving to Firestore
-            safe_data = convert_data_for_firestore(st.session_state['messages'])
-            document_ref.set({'messages': safe_data})
+# Lugar donde se procesa la respuesta de la IA antes de mostrarla
+if generated_text:
+    clean_text = extract_text_from_response(generated_text["content"])
+    st.session_state['messages'].append({"role": "assistant", "content": clean_text})
 
-            st.session_state.update({'new_input': False})  # Reset the input flag
-            st.rerun()
+    # Convert data before saving to Firestore
+    safe_data = convert_data_for_firestore(st.session_state['messages'])
+    document_ref.set({'messages': safe_data})
 
-if st.session_state.get("logged_in", False) and st.button("Cerrar Sesión"):
-    for key in list(st.session_state.keys()):
-        del st.session_state[key]
-    st.write("Sesión cerrada. ¡Gracias por usar el Chatbot!")
+    st.session_state.update({'new_input': False})  # Reset the input flag
     st.rerun()
+
