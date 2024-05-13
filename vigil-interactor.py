@@ -123,35 +123,35 @@ if st.session_state.get("logged_in", False):
         st.session_state['messages'].append({"role": "user", "content": prompt})
         
         with st.spinner('El bot está pensando...'):
-            system = """[Aquí puedes escribir el sistema de comportamiento actualizado para la IA]"""
-            user_name = st.session_state.get("user_name", "Usuario desconocido")
-            internal_prompt = system + "\n\n"
-            internal_prompt += "\n".join([f"{msg['role']}: {msg['content']}" for msg in st.session_state['messages'][-5:]])
-            internal_prompt += f"\n\n{user_name}: {prompt}"
+    system = """[Aquí puedes escribir el sistema de comportamiento actualizado para la IA]"""
+    user_name = st.session_state.get("user_name", "Usuario desconocido")
+    internal_prompt = system + "\n\n"
+    internal_prompt += "\n".join([f"{msg['role']}: {msg['content']}" for msg in st.session_state['messages'][-5:]])
+    internal_prompt += f"\n\n{user_name}: {prompt}"
 
     response = client.messages.create(
-    model="claude-3-haiku-20240307",
-    max_tokens=2000,
-    temperature=0.9,
-    messages=[{
-        "role": "user",
-        "content": internal_prompt
-    }]
-)
+        model="claude-3-haiku-20240307",
+        max_tokens=2000,
+        temperature=0.9,
+        messages=[{
+            "role": "user",
+            "content": internal_prompt
+        }]
+    )
 
-generated_text = response.choices[0].message.content
-st.session_state['messages'].append({"role": "assistant", "content": generated_text})
+    generated_text = response.choices[0].message.content
+    st.session_state['messages'].append({"role": "assistant", "content": generated_text})
 
-# Convert data before saving to Firestore
-safe_data = convert_data_for_firestore(st.session_state['messages'])
-document_ref.set({'messages': safe_data})
+    # Convert data before saving to Firestore
+    safe_data = convert_data_for_firestore(st.session_state['messages'])
+    document_ref.set({'messages': safe_data})
 
-st.session_state.update({'new_input': False})  # Reset the input flag
-st.rerun()
-
+    st.session_state.update({'new_input': False})  # Reset the input flag
+    st.rerun()
 
 if st.session_state.get("logged_in", False) and st.button("Cerrar Sesión"):
     for key in list(st.session_state.keys()):
         del st.session_state[key]
     st.write("Sesión cerrada. ¡Gracias por usar el Chatbot!")
     st.rerun()
+
