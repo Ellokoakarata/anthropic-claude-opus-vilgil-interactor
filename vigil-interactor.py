@@ -139,8 +139,6 @@ if st.session_state.get("logged_in", False):
             )
 
             generated_text = response.content
-            st.rerun()
-       
             
 
             # Convert data before saving to Firestore
