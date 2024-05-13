@@ -95,7 +95,7 @@ if st.session_state.get("logged_in", False):
         st.markdown("### Historial de Conversación")
         for msg in st.session_state['messages']:
             col1, col2 = st.columns([1, 5])
-            if msg["role"] == "user":
+            if msg.get("role") == "user":
                 with col1:
                     st.markdown("**Tú 🧑:**")
                 with col2:
