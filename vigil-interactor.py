@@ -110,7 +110,6 @@ if st.session_state.get("logged_in", False):
     
     if prompt and st.session_state.get('new_input', False):
         st.session_state['messages'].append({"role": "user", "content": prompt})
-        
 def extract_clean_text(response):
     if 'content' in response and isinstance(response.content, list):
         # Extraemos los bloques de tipo 'text' y concatenamos sus textos
