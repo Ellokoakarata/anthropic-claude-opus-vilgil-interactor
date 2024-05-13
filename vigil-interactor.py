@@ -91,31 +91,37 @@ if st.session_state.get("logged_in", False):
     if doc_data and 'messages' in doc_data:
         st.session_state['messages'] = doc_data['messages']
     
-    with st.container():
-        st.markdown("### Historial de Conversación")
-        for msg in st.session_state['messages']:
-            col1, col2 = st.columns([1, 5])
-            if msg["role"] == "user":
-                with col1:
-                    st.markdown("**Tú 🧑:**")
-                with col2:
-                    st.info(msg['content'])
-            else:
-                with col1:
-                    st.markdown("**IA 🤖:**")
-                with col2:
-                    st.success(msg['content'])
+    # Asegúrate de acceder a la lista de mensajes correctamente
+messages = st.session_state['messages']['messages']
+
+with st.container():
+    st.markdown("### Historial de Conversación")
+    print("Contenido de messages:", messages)
+    for msg in messages:
+        print("Tipo de msg:", type(msg), "Contenido de msg:", msg)
+        col1, col2 = st.columns([1, 5])
+        if isinstance(msg, dict) and msg.get("role") == "user":
+            with col1:
+                st.markdown("**Tú 🧑:**")
+            with col2:
+                st.info(msg['content'])
+        elif isinstance(msg, dict):
+            with col1:
+                st.markdown("**IA 🤖:**")
+            with col2:
+                st.success(msg['content'])
 
     prompt = st.text_input("Escribe tu mensaje aquí:", key="new_chat_input", on_change=lambda: st.session_state.update({'new_input': True}))
     
     if prompt and st.session_state.get('new_input', False):
-        st.session_state['messages'].append({"role": "user", "content": prompt})
+        # Añadir el nuevo mensaje a la lista correcta dentro del diccionario
+        messages.append({"role": "user", "content": prompt})
         
         with st.spinner('El bot está pensando...'):
             system = """[Aquí puedes escribir el sistema de comportamiento actualizado para la IA]"""
             user_name = st.session_state.get("user_name", "Usuario desconocido")
             internal_prompt = system + "\n\n"
-            internal_prompt += "\n".join([f"{msg['role']}: {msg['content']}" for msg in st.session_state['messages'][-5:]])
+            internal_prompt += "\n".join([f"{msg['role']}: {msg['content']}" for msg in messages[-5:]])
             internal_prompt += f"\n\n{user_name}: {prompt}"
 
             response = client.messages.create(
@@ -129,10 +135,10 @@ if st.session_state.get("logged_in", False):
             )
 
             generated_text = response.content
-            st.session_state['messages'].append({"role": "assistant", "content": generated_text})
+            messages.append({"role": "assistant", "content": generated_text})
 
-            # Convert data before saving to Firestore
-            safe_data = convert_data_for_firestore(st.session_state['messages'])
+            # Convertir datos antes de guardarlos en Firestore
+            safe_data = convert_data_for_firestore(messages)
             document_ref.set({'messages': safe_data})
 
             st.session_state.update({'new_input': False})  # Reset the input flag
