@@ -87,17 +87,13 @@ if not st.session_state.get("logged_in", False):
 if st.session_state.get("logged_in", False):
     st.write(f"Bienvenido de nuevo, {st.session_state.get('user_name', 'Usuario')}!")
     
-   # Verificar y cargar los mensajes desde Firestore al inicio
-doc_data = document_ref.get().to_dict()
-if doc_data and 'messages' in doc_data:
-    st.session_state['messages'] = doc_data['messages']
-else:
-    st.session_state['messages'] = []  # Asegurarse de que siempre hay una lista de mensajes
-
-with st.container():
-    st.markdown("### Historial de Conversación")
-    for msg in st.session_state['messages']:
-        if isinstance(msg, dict) and 'role' in msg and 'content' in msg:
+    doc_data = document_ref.get().to_dict()
+    if doc_data and 'messages' in doc_data:
+        st.session_state['messages'] = doc_data['messages']
+    
+    with st.container():
+        st.markdown("### Historial de Conversación")
+        for msg in st.session_state['messages']:
             col1, col2 = st.columns([1, 5])
             if msg["role"] == "user":
                 with col1:
@@ -109,42 +105,41 @@ with st.container():
                     st.markdown("**IA 🤖:**")
                 with col2:
                     st.success(msg['content'])
-        else:
-            st.error(f"Unexpected message format or missing keys in msg: {msg}")
 
-prompt = st.text_input("Escribe tu mensaje aquí:", key="new_chat_input", on_change=lambda: st.session_state.update({'new_input': True}))
+    prompt = st.text_input("Escribe tu mensaje aquí:", key="new_chat_input", on_change=lambda: st.session_state.update({'new_input': True}))
+    
+    if prompt and st.session_state.get('new_input', False):
+        st.session_state['messages'].append({"role": "user", "content": prompt})
+        
+        with st.spinner('El bot está pensando...'):
+            system = """[Aquí puedes escribir el sistema de comportamiento actualizado para la IA]"""
+            user_name = st.session_state.get("user_name", "Usuario desconocido")
+            internal_prompt = system + "\n\n"
+            internal_prompt += "\n".join([f"{msg['role']}: {msg['content']}" for msg in st.session_state['messages'][-5:]])
+            internal_prompt += f"\n\n{user_name}: {prompt}"
 
-if prompt and st.session_state.get('new_input', True):
-    st.session_state['messages'].append({"role": "user", "content": prompt})
-    st.session_state.update({'new_input': False})  # Reset the input flag immediately after use
+            response = client.messages.create(
+                model="claude-3-haiku-20240307",
+                max_tokens=2000,
+                temperature=0.9,
+                messages=[{
+                    "role": "user",
+                    "content": internal_prompt
+                }]
+            )
 
-    with st.spinner('El bot está pensando...'):
-        system = """[Aquí puedes escribir el sistema de comportamiento actualizado para la IA]"""
-        user_name = st.session_state.get("user_name", "Usuario desconocido")
-        internal_prompt = system + "\n\n"
-        internal_prompt += "\n".join([f"{msg['role']}: {msg['content']}" for msg in st.session_state['messages'][-5:]])
-        internal_prompt += f"\n\n{user_name}: {prompt}"
+            generated_text = response.content
+            st.session_state['messages'].append({"role": "assistant", "content": generated_text})
 
-        response = client.messages.create(
-            model="claude-3-haiku-20240307",
-            max_tokens=2000,
-            temperature=0.9,
-            messages=[{
-                "role": "user",
-                "content": internal_prompt
-            }]
-        )
+            # Convert data before saving to Firestore
+            safe_data = convert_data_for_firestore(st.session_state['messages'])
+            document_ref.set({'messages': safe_data})
 
-        generated_text = response.content
-        st.session_state['messages'].append({"role": "assistant", "content": generated_text})
-
-        # Convert data before saving to Firestore
-        safe_data = convert_data_for_firestore({"messages": st.session_state['messages']})
-        document_ref.set(safe_data)
-
-        st.rerun()  # Use experimental_rerun for proper rerun behavior
+            st.session_state.update({'new_input': False})  # Reset the input flag
+            st.rerun()
 
 if st.session_state.get("logged_in", False) and st.button("Cerrar Sesión"):
-    st.session_state.clear()  # This method clears all the keys in the session state
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
     st.write("Sesión cerrada. ¡Gracias por usar el Chatbot!")
-    st.rerun()  # Use experimental_rerun for proper rerun behavior
+    st.rerun()
