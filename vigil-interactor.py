@@ -93,7 +93,7 @@ if st.session_state.get("logged_in", False):
 
     # Asegúrate de que 'messages' está inicializado
     if 'messages' not in st.session_state:
-    st.session_state['messages'] = []
+     st.session_state['messages'] = []
     with st.container():
         st.markdown("### Historial de Conversación")
         for msg in st.session_state['messages']:
