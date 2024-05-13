@@ -35,7 +35,7 @@ db = firestore.client()
 anthropic_api_key = st.secrets["ANTHROPIC_API_KEY"]
 
 # Inicializar el cliente de AnthropIC con la clave API
-client = AnthropIC(api_key=anthropic_api_key)
+client = Anthropic(api_key=anthropic_api_key)
 
 # Display logo
 logo_url = 'https://firebasestorage.googleapis.com/v0/b/diario-ad840.appspot.com/o/c8d5e737-bd01-40b0-8c9f-721d5f123f91.webp?alt=media&token=d01aeeac-48a2-41ca-82c4-ca092946bbc9'
