@@ -1,4 +1,4 @@
-from anthropic import AnthropIC
+from anthropic import Anthropic
 import os
 import time
 import streamlit as st
