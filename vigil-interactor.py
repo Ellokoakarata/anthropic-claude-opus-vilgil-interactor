@@ -144,6 +144,10 @@ if st.session_state.get("logged_in", False):
         # Mostrar spinner mientras se espera la respuesta del bot
 with st.spinner('El bot está pensando...'):
     user_name = st.session_state.get("user_name", "Usuario desconocido")
+    
+     # Asumiendo que obtienes la entrada del usuario a través de un input de Streamlit
+    prompt = st.text_input("Escribe tu mensaje aquí:")
+    
     # Definir el system message que guía la conducta del modelo
     system = """
     Sistema de Comportamiento Actualizado para Vigil Interactor
