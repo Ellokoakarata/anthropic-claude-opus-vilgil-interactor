@@ -122,7 +122,7 @@ if st.session_state.get("logged_in", False):
     if prompt and st.session_state.get('new_input', False):
         st.session_state['messages'].append({"role": "user", "content": prompt})
         
-        with st.spinner('El bot está pensando...'):
+    with st.spinner('El bot está pensando...'):
     system = """[Aquí puedes escribir el sistema de comportamiento actualizado para la IA]"""
     user_name = st.session_state.get("user_name", "Usuario desconocido")
     internal_prompt = system + "\n\n"
