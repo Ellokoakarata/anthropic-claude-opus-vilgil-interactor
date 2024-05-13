@@ -123,11 +123,17 @@ if st.session_state.get("logged_in", False):
         st.session_state['messages'].append({"role": "user", "content": prompt})
         
 def extract_text_from_response(response_content):
-    # La respuesta_content es una lista de diccionarios
-    # Cada diccionario tiene una clave "text" y "type"
+    # Verifica si response_content es una lista de diccionarios
     if isinstance(response_content, list):
+        # Extrae el texto de cada diccionario
         return " ".join([item["text"] for item in response_content if item["type"] == "text"])
-    return ""
+    # Si response_content es un solo diccionario, extrae el texto directamente
+    elif isinstance(response_content, dict) and response_content.get("type") == "text":
+        return response_content["text"]
+    # Si response_content no es un formato reconocido, devuelve una cadena vacía
+    else:
+        return ""
+
 
 with st.spinner('El bot está pensando...'):
     system = """[Aquí puedes escribir el sistema de comportamiento actualizado para la IA]"""
@@ -162,4 +168,5 @@ if st.session_state.get("logged_in", False) and st.button("Cerrar Sesión"):
         del st.session_state[key]
     st.write("Sesión cerrada. ¡Gracias por usar el Chatbot!")
     st.rerun()
+
 
