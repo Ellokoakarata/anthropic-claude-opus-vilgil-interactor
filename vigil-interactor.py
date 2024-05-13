@@ -92,19 +92,21 @@ if st.session_state.get("logged_in", False):
         st.session_state['messages'] = doc_data['messages']
     
     with st.container():
-        st.markdown("### Historial de Conversación")
-        for msg in st.session_state['messages']:
-            col1, col2 = st.columns([1, 5])
-            if msg.get("role") == "user":
-                with col1:
-                    st.markdown("**Tú 🧑:**")
-                with col2:
-                    st.info(msg['content'])
-            else:
-                with col1:
-                    st.markdown("**IA 🤖:**")
-                with col2:
-                    st.success(msg['content'])
+    st.markdown("### Historial de Conversación")
+    print("Contenido de st.session_state['messages']:", st.session_state['messages'])
+    for msg in st.session_state['messages']:
+        print("Tipo de msg:", type(msg), "Contenido de msg:", msg)
+        col1, col2 = st.columns([1, 5])
+        if msg["role"] == "user":
+            with col1:
+                st.markdown("**Tú 🧑:**")
+            with col2:
+                st.info(msg['content'])
+        else:
+            with col1:
+                st.markdown("**IA 🤖:**")
+            with col2:
+                st.success(msg['content'])
 
     prompt = st.text_input("Escribe tu mensaje aquí:", key="new_chat_input", on_change=lambda: st.session_state.update({'new_input': True}))
     
