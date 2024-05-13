@@ -204,7 +204,7 @@ Este sistema de prompts actúa como un marco de operaciones que guía a la IA a 
                 temperature=0.9,
                 messages=[{
                     "role": "user",
-                    "content": internal_prompt
+                    "content": internal_prompt + system
                 }]
             )
 
