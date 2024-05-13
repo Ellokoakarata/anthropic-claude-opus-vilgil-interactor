@@ -54,21 +54,6 @@ Guía para usar el bot
 5) Siempre usa el mismo nombre de sesión, esto te ayudará a recuperar la sesión.
 """)
 
-if "user_uuid" not in st.session_state:
-    st.session_state["user_uuid"] = None
-if 'messages' not in st.session_state:
-    st.session_state['messages'] = []
-if "logged_in" not in st.session_state:
-    st.session_state["logged_in"] = False
-if "user_name" not in st.session_state:
-    st.session_state["user_name"] = None
-
-now = datetime.now()
-collection_name = "vigil_interactor" + now.strftime("%Y-%m-%d")
-document_name = st.session_state.get("user_uuid", str(uuid.uuid4()))
-collection_ref = db.collection(collection_name)
-document_ref = collection_ref.document(document_name)
-
 def convert_data_for_firestore(data):
     if isinstance(data, dict):
         return {k: convert_data_for_firestore(v) for k, v in data.items()}
@@ -78,6 +63,11 @@ def convert_data_for_firestore(data):
         return data
     else:
         return str(data)  # Convert non-supported types to string
+
+now = datetime.now()
+collection_name = "vigil_interactor" + now.strftime("%Y-%m-%d")
+document_name = st.session_state.get("user_uuid", str(uuid.uuid4()))
+document_ref = db.collection(collection_name).document(document_name)
 
 if not st.session_state.get("logged_in", False):
     user_name = st.text_input("Introduce tu nombre para comenzar")
@@ -116,9 +106,9 @@ if st.session_state.get("logged_in", False):
                 with col2:
                     st.success(msg['content'])
 
-    prompt = st.text_input("Escribe tu mensaje aquí:", key="new_chat_input")
+    prompt = st.text_input("Escribe tu mensaje aquí:", key="new_chat_input", on_change=lambda: st.session_state.update({'new_input': True}))
     
-    if prompt:
+    if prompt and st.session_state.get('new_input', False):
         st.session_state['messages'].append({"role": "user", "content": prompt})
         
         with st.spinner('El bot está pensando...'):
@@ -139,16 +129,17 @@ if st.session_state.get("logged_in", False):
             )
 
             generated_text = response.content
-            
+            st.session_state['messages'].append({"role": "assistant", "content": generated_text})
 
             # Convert data before saving to Firestore
-            safe_data = convert_data_for_firestore({"messages": st.session_state['messages'] + [{"role": "assistant", "content": generated_text}]})
-            document_ref.set(safe_data)
-        
+            safe_data = convert_data_for_firestore(st.session_state['messages'])
+            document_ref.set({'messages': safe_data})
+
+            st.session_state.update({'new_input': False})  # Reset the input flag
+            st.rerun()
 
 if st.session_state.get("logged_in", False) and st.button("Cerrar Sesión"):
     for key in list(st.session_state.keys()):
         del st.session_state[key]
     st.write("Sesión cerrada. ¡Gracias por usar el Chatbot!")
     st.rerun()
-
