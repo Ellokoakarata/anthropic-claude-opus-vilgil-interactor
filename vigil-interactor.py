@@ -92,7 +92,7 @@ if st.session_state.get("logged_in", False):
         st.session_state['messages'] = doc_data['messages']
     
     with st.container():
-    st.markdown("### Historial de Conversación")
+     st.markdown("### Historial de Conversación")
     print("Contenido de st.session_state['messages']:", st.session_state['messages'])
     for msg in st.session_state['messages']:
         print("Tipo de msg:", type(msg), "Contenido de msg:", msg)
