@@ -64,6 +64,17 @@ def convert_data_for_firestore(data):
     else:
         return str(data)  # Convert non-supported types to string
 
+# Inicializar st.session_state
+if "user_uuid" not in st.session_state:
+    st.session_state["user_uuid"] = None  # Cambiado a None inicialmente
+if 'messages' not in st.session_state:
+    st.session_state['messages'] = []
+if "logged_in" not in st.session_state:
+    st.session_state["logged_in"] = False
+if "user_name" not in st.session_state:
+    st.session_state["user_name"] = None
+
+
 now = datetime.now()
 collection_name = "vigil_interactor" + now.strftime("%Y-%m-%d")
 document_name = st.session_state.get("user_uuid", str(uuid.uuid4()))
