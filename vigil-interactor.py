@@ -128,19 +128,15 @@ if st.session_state.get("logged_in", False):
                 }]
             )
 
-         # Suponiendo que 'response.content' es una lista de bloques
-    if isinstance(response.content, list):
-        formatted_text = "\n".join([block.text for block in response.content if block.type == 'text'])
-    else:
-        formatted_text = response.content  # Si no es una lista, usar el contenido directamente
+            generated_text = response.content
+            st.session_state['messages'].append({"role": "assistant", "content": generated_text})
 
-    st.session_state['messages'].append({"role": "assistant", "content": formatted_text})
             # Convert data before saving to Firestore
-    safe_data = convert_data_for_firestore(st.session_state['messages'])
-    document_ref.set({'messages': safe_data})
+            safe_data = convert_data_for_firestore(st.session_state['messages'])
+            document_ref.set({'messages': safe_data})
 
-    st.session_state.update({'new_input': False})  # Reset the input flag
-    st.rerun()
+            st.session_state.update({'new_input': False})  # Reset the input flag
+            st.rerun()
 
 if st.session_state.get("logged_in", False) and st.button("Cerrar Sesión"):
     for key in list(st.session_state.keys()):
