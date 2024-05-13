@@ -82,7 +82,7 @@ if not st.session_state.get("logged_in", False):
             user_doc_ref = db.collection("usuarios_vi").document(new_uuid)
             user_doc_ref.set({"nombre": user_name, "user_uuid": new_uuid})
         st.session_state["logged_in"] = True
-        st.rerun()
+        st.experimental_rerun()
 
 if st.session_state.get("logged_in", False):
     st.write(f"Bienvenido de nuevo, {st.session_state.get('user_name', 'Usuario')}!")
@@ -143,3 +143,4 @@ if st.session_state.get("logged_in", False) and st.button("Cerrar Sesión"):
         del st.session_state[key]
     st.write("Sesión cerrada. ¡Gracias por usar el Chatbot!")
     st.rerun()
+
