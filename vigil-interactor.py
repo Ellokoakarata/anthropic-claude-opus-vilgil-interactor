@@ -139,7 +139,7 @@ if st.session_state.get("logged_in", False):
                 }]
             )
 
-            generated_text = "\n".join([block.text for block in message.content if block.type == 'text'])
+            generated_text = "\n".join([block.text for block in response.content if block.type == 'text'])
 
             st.session_state['messages'].append({"role": "assistant", "content": generated_text})
 
