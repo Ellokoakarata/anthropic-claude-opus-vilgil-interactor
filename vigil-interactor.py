@@ -76,6 +76,8 @@ def convert_data_for_firestore(data):
         return [convert_data_for_firestore(v) for v in data]
     elif isinstance(data, (str, int, float, bool)):
         return data
+    elif hasattr(data, 'text') and hasattr(data, 'type') and data.type == 'text':  # Assuming data objects with text attribute
+        return data.text
     else:
         return str(data)  # Convert non-supported types to string
 
@@ -143,8 +145,7 @@ if st.session_state.get("logged_in", False):
             # Convert data before saving to Firestore
             safe_data = convert_data_for_firestore({"messages": st.session_state['messages'] + [{"role": "assistant", "content": generated_text}]})
             document_ref.set(safe_data)
-            st.rerun()
-
+            st.rerun()  # Use st.rerun to refresh the page and show the new messages
 
 if st.session_state.get("logged_in", False) and st.button("Cerrar Sesión"):
     for key in list(st.session_state.keys()):
