@@ -140,11 +140,11 @@ if st.session_state.get("logged_in", False):
 
             generated_text = response.content
             st.rerun()
+       
             
 
             # Convert data before saving to Firestore
             safe_data = convert_data_for_firestore({"messages": st.session_state['messages'] + [{"role": "assistant", "content": generated_text}]})
-            st.rerun()
             document_ref.set(safe_data)
         
 
